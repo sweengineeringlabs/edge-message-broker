@@ -6,7 +6,11 @@
 
 mod api;
 mod core;
-mod gateway;
 mod saf;
 
-pub use gateway::*;
+pub use api::broker::BrokerError;
+pub use api::broker::Message;
+pub use api::broker::MessageBroker;
+pub use api::broker::MessageStream;
+pub use api::traits::Validator;
+pub use saf::*;
