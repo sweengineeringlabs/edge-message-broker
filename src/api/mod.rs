@@ -4,3 +4,6 @@ pub(crate) mod application_config_builder;
 pub(crate) mod architecture_config_builder;
 pub(crate) mod broker;
 pub(crate) mod traits;
+
+pub use application_config_builder::ApplicationConfigBuilder;
+pub use architecture_config_builder::ArchitectureConfigBuilder;
