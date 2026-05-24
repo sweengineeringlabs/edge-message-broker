@@ -1,5 +1,6 @@
 //! SAF — message broker public factory surface.
 
+use swe_edge_configbuilder::ConfigBuilder as _;
 #[cfg(feature = "nats")]
 use crate::api::broker::broker_error::BrokerError;
 #[cfg(any(feature = "tokio-rt", feature = "nats"))]
@@ -9,6 +10,13 @@ use crate::api::traits::Validator;
 use crate::core::broker::InMemoryMessageBroker;
 #[cfg(feature = "nats")]
 use crate::core::broker::NatsMessageBroker;
+
+/// Return a [`ConfigBuilder`] pre-seeded with this crate's package name and version.
+pub fn create_config_builder() -> impl swe_edge_configbuilder::ConfigBuilder {
+    swe_edge_configbuilder::create_config_builder()
+        .with_name(env!("CARGO_PKG_NAME"))
+        .with_version(env!("CARGO_PKG_VERSION"))
+}
 
 /// Construct an in-memory broker backed by [`tokio::sync::broadcast`].
 ///

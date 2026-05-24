@@ -2,9 +2,7 @@
 
 mod edge_message_broker_svc;
 
-pub use crate::api::application_config_builder::ApplicationConfigBuilder;
-pub use crate::api::architecture_config_builder::ArchitectureConfigBuilder;
-
+pub use edge_message_broker_svc::create_config_builder;
 #[cfg(feature = "tokio-rt")]
 pub use edge_message_broker_svc::in_memory_broker;
 #[cfg(feature = "nats")]
