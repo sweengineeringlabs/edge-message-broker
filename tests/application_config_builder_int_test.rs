@@ -1,7 +1,6 @@
 //! Integration tests for [`create_config_builder`].
 
 use swe_edge_message_broker::create_config_builder;
-use swe_edge_configbuilder::ConfigBuilder as _;
 
 /// @covers: create_config_builder — returns a pre-seeded builder with this crate's package name
 #[test]
