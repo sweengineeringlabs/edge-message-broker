@@ -1,10 +1,15 @@
 //! SAF layer — message broker public facade.
 
-mod edge_message_broker_svc;
+mod broker_svc;
 
-pub use edge_message_broker_svc::create_config_builder;
+pub use crate::api::types::ApplicationConfigBuilder;
+pub use crate::api::types::BrokerSvc;
+pub use crate::api::error::BrokerError;
+pub use crate::api::broker::Message;
+pub use crate::api::broker::MessageBroker;
+pub use crate::api::broker::MessageStream;
+pub use crate::api::types::Validator;
 #[cfg(feature = "tokio-rt")]
-pub use edge_message_broker_svc::in_memory_broker;
+pub use crate::api::broker::r#in::InMemoryMessageBroker;
 #[cfg(feature = "nats")]
-pub use edge_message_broker_svc::nats_broker;
-pub use edge_message_broker_svc::validate;
+pub use crate::api::broker::nats::NatsMessageBroker;

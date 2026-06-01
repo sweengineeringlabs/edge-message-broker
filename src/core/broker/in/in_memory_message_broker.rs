@@ -9,8 +9,7 @@ use tokio::sync::{broadcast, RwLock};
 use crate::api::broker::broker_error::BrokerError;
 use crate::api::broker::message::message::Message;
 use crate::api::broker::message_broker::MessageBroker;
-use crate::api::broker::message_stream::MessageStream;
-use crate::api::traits::Validator;
+use crate::api::broker::stream::MessageStream;
 
 /// Capacity of each topic's broadcast channel.
 const CHANNEL_CAPACITY: usize = 1024;
@@ -32,12 +31,6 @@ impl InMemoryMessageBroker {
         Self {
             channels: Arc::new(RwLock::new(HashMap::new())),
         }
-    }
-}
-
-impl Validator for InMemoryMessageBroker {
-    fn validate(&self) -> Result<(), String> {
-        Ok(())
     }
 }
 
@@ -103,11 +96,6 @@ mod tests {
     fn test_new_creates_empty_broker() {
         let broker = InMemoryMessageBroker::new();
         drop(broker);
-    }
-
-    #[test]
-    fn test_validate_returns_ok() {
-        assert!(InMemoryMessageBroker::new().validate().is_ok());
     }
 
     #[tokio::test]

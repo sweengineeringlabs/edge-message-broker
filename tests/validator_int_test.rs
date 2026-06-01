@@ -1,6 +1,6 @@
-//! Tests for the [`Validator`] trait contract.
+//! Tests for the [`Validator`] trait contract and [`BrokerSvc::validate`].
 
-use swe_edge_message_broker::Validator;
+use swe_edge_message_broker::{BrokerSvc, Validator};
 
 #[test]
 fn test_custom_validator_ok_path() {
@@ -24,4 +24,30 @@ fn test_custom_validator_error_path() {
     let result = AlwaysErr.validate();
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), "always invalid");
+}
+
+/// @covers: validate — BrokerSvc::validate delegates to Validator::validate
+#[test]
+fn test_broker_svc_validate_ok_for_valid_type() {
+    struct Valid;
+    impl Validator for Valid {
+        fn validate(&self) -> Result<(), String> {
+            Ok(())
+        }
+    }
+    assert!(BrokerSvc::validate(&Valid).is_ok());
+}
+
+/// @covers: validate — BrokerSvc::validate returns err for invalid type
+#[test]
+fn test_broker_svc_validate_err_for_invalid_type() {
+    struct Invalid;
+    impl Validator for Invalid {
+        fn validate(&self) -> Result<(), String> {
+            Err("bad state".into())
+        }
+    }
+    let result = BrokerSvc::validate(&Invalid);
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "bad state");
 }

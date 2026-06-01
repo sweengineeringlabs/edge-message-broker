@@ -7,9 +7,9 @@
 #[tokio::main]
 async fn main() {
     use futures::StreamExt as _;
-    use swe_edge_message_broker::{in_memory_broker, Message, MessageBroker as _};
+    use swe_edge_message_broker::{BrokerSvc, Message, MessageBroker as _};
 
-    let broker = in_memory_broker();
+    let broker = BrokerSvc::in_memory_broker();
 
     // Subscribe before publishing to avoid missing messages.
     let mut stream = broker.subscribe("events").await.unwrap();

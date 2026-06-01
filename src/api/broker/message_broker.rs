@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 
 use crate::api::broker::broker_error::BrokerError;
 use crate::api::broker::message::message::Message;
-use crate::api::broker::message_stream::MessageStream;
+use crate::api::broker::stream::MessageStream;
 
 /// Cross-process publish/subscribe broker contract.
 ///
@@ -41,14 +41,4 @@ pub trait MessageBroker: Send + Sync {
 
     /// Probe broker connectivity. Returns `Ok(())` if the broker is reachable.
     fn health_check(&self) -> BoxFuture<'_, Result<(), BrokerError>>;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_message_broker_is_object_safe() {
-        fn _check(_: &dyn MessageBroker) {}
-    }
 }

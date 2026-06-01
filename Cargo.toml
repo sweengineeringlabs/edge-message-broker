@@ -34,7 +34,7 @@ thiserror              = "1.0"
 tracing                = "0.1"
 tokio                  = { version = "1.0", features = ["sync", "rt"], optional = true }
 async-nats             = { version = "0.35", optional = true }
-swe-edge-configbuilder = { path = "../../configbuilder/main/features/configbuilder" }
+swe-edge-configbuilder = { git = "https://github.com/sweengineeringlabs/edge.git", branch = "dev" }
 
 [dev-dependencies]
 tokio   = { version = "1.0", features = ["rt-multi-thread", "macros"] }
@@ -57,6 +57,34 @@ path = "tests/edge_message_broker_svc_int_test.rs"
 name = "validator_int_test"
 path = "tests/validator_int_test.rs"
 
+[[test]]
+name = "broker_error_int_test"
+path = "tests/broker_error_int_test.rs"
+
+[[test]]
+name = "message_int_test"
+path = "tests/message_int_test.rs"
+
+[[test]]
+name = "message_broker_int_test"
+path = "tests/message_broker_int_test.rs"
+
+[[test]]
+name = "message_stream_int_test"
+path = "tests/message_stream_int_test.rs"
+
+[[test]]
+name = "in_memory_message_broker_int_test"
+path = "tests/in_memory_message_broker_int_test.rs"
+
+[[test]]
+name = "nats_message_broker_int_test"
+path = "tests/nats_message_broker_int_test.rs"
+
+[[test]]
+name = "broker_backend_int_test"
+path = "tests/broker_backend_int_test.rs"
+
 [[example]]
 name = "in_memory_broker"
 path = "examples/in_memory_broker.rs"
@@ -64,3 +92,7 @@ path = "examples/in_memory_broker.rs"
 [lints.rust]
 unsafe_code  = "deny"
 missing_docs = "warn"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
