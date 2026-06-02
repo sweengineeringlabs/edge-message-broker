@@ -10,6 +10,7 @@ use futures::future::BoxFuture;
 ///
 /// Downstream consumers may implement `MessageBroker` on this type to signal
 /// compatibility with the `swe-edge-message-broker` SPI surface.
+/// Extension point marker for downstream broker substitution.
 pub(crate) struct BrokerBackend;
 
 // Silence dead_code: BrokerBackend IS constructed in tests to verify the SPI contract.

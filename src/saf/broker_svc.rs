@@ -27,8 +27,8 @@ impl BrokerSvc {
     ///
     /// Requires the `tokio-rt` feature.
     #[cfg(feature = "tokio-rt")]
-    pub fn in_memory_broker() -> impl MessageBroker + Clone {
-        InMemoryMessageBroker::new()
+    pub fn in_memory_broker() -> Box<dyn MessageBroker> {
+        Box::new(InMemoryMessageBroker::new())
     }
 
     /// Connect to a NATS server and return a broker handle.
@@ -39,8 +39,8 @@ impl BrokerSvc {
     ///
     /// Requires the `nats` feature.
     #[cfg(feature = "nats")]
-    pub async fn nats_broker(url: &str) -> Result<impl MessageBroker, BrokerError> {
-        NatsMessageBroker::connect(url).await
+    pub async fn nats_broker(url: &str) -> Result<Box<dyn MessageBroker>, BrokerError> {
+        NatsMessageBroker::connect(url).await.map(|b| Box::new(b) as Box<dyn MessageBroker>)
     }
 
     /// Validate a value that implements [`Validator`].
