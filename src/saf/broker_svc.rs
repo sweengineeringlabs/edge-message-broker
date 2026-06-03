@@ -2,15 +2,15 @@
 //!
 //! All factory functions are implemented as methods on [`BrokerSvc`].
 
-#[cfg(feature = "nats")]
 use crate::api::broker::broker_error::BrokerError;
-#[cfg(any(feature = "tokio-rt", feature = "nats"))]
 use crate::api::broker::message_broker::MessageBroker;
+use crate::api::types::backend_kind::BackendKind;
+use crate::api::types::broker_svc::BrokerSvc;
+use crate::api::types::message_broker_config::MessageBrokerConfig;
 #[cfg(feature = "tokio-rt")]
 use crate::core::broker::InMemoryMessageBroker;
 #[cfg(feature = "nats")]
 use crate::core::broker::NatsMessageBroker;
-use crate::api::types::broker_svc::BrokerSvc;
 
 impl BrokerSvc {
     /// Return a [`ConfigBuilderImpl`] pre-seeded with this crate's package name and version.
@@ -40,7 +40,65 @@ impl BrokerSvc {
     /// Requires the `nats` feature.
     #[cfg(feature = "nats")]
     pub async fn nats_broker(url: &str) -> Result<Box<dyn MessageBroker>, BrokerError> {
-        NatsMessageBroker::connect(url).await.map(|b| Box::new(b) as Box<dyn MessageBroker>)
+        NatsMessageBroker::connect(url)
+            .await
+            .map(|b| Box::new(b) as Box<dyn MessageBroker>)
+    }
+
+    /// Construct and wire a broker from a loaded [`MessageBrokerConfig`].
+    ///
+    /// This is the factory referenced by ADR-006: a `FeatureState::Enabled(cfg)`
+    /// obtained from the configbuilder feature registry flows directly into this
+    /// method to produce a ready-to-use broker.
+    ///
+    /// The backend is selected by [`MessageBrokerConfig::backend`]:
+    /// - [`BackendKind::InMemory`] builds an in-process broadcast broker
+    ///   (requires the `tokio-rt` feature).
+    /// - [`BackendKind::Nats`] connects to the configured `url`
+    ///   (requires the `nats` feature).
+    ///
+    /// # Errors
+    ///
+    /// - [`BrokerError::Unavailable`] if the requested backend's Cargo feature
+    ///   is not compiled in.
+    /// - [`BrokerError::Connection`] if a NATS connection cannot be established,
+    ///   or if `backend = "nats"` was loaded without a `url`.
+    pub async fn from_config(
+        config: &MessageBrokerConfig,
+    ) -> Result<Box<dyn MessageBroker>, BrokerError> {
+        match config.backend {
+            BackendKind::InMemory => {
+                #[cfg(feature = "tokio-rt")]
+                {
+                    Ok(Box::new(InMemoryMessageBroker::new()) as Box<dyn MessageBroker>)
+                }
+                #[cfg(not(feature = "tokio-rt"))]
+                {
+                    Err(BrokerError::Unavailable(
+                        "in_memory backend requires the `tokio-rt` feature".to_owned(),
+                    ))
+                }
+            }
+            BackendKind::Nats => {
+                #[cfg(feature = "nats")]
+                {
+                    let url = config.url.as_deref().ok_or_else(|| {
+                        BrokerError::Connection(
+                            "nats backend requires a `url` but none was configured".to_owned(),
+                        )
+                    })?;
+                    NatsMessageBroker::connect(url)
+                        .await
+                        .map(|b| Box::new(b) as Box<dyn MessageBroker>)
+                }
+                #[cfg(not(feature = "nats"))]
+                {
+                    Err(BrokerError::Unavailable(
+                        "nats backend requires the `nats` feature".to_owned(),
+                    ))
+                }
+            }
+        }
     }
 
     /// Validate a value that implements [`Validator`].

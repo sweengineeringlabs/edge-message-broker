@@ -1,8 +1,8 @@
 //! Extension point marker for downstream broker substitution.
 
-use crate::api::broker::message_broker::MessageBroker;
 use crate::api::broker::broker_error::BrokerError;
 use crate::api::broker::message::message::Message;
+use crate::api::broker::message_broker::MessageBroker;
 use crate::api::broker::stream::MessageStream;
 use futures::future::BoxFuture;
 

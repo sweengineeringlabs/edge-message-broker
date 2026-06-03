@@ -30,16 +30,19 @@ kafka    = []
 [dependencies]
 bytes                  = "1.0"
 futures                = "0.3"
+serde                  = { version = "1.0", features = ["derive"] }
 thiserror              = "1.0"
 tracing                = "0.1"
 tokio                  = { version = "1.0", features = ["sync", "rt"], optional = true }
-async-nats             = { version = "0.35", optional = true }
+async-nats             = { version = "0.49", optional = true }
 swe-edge-configbuilder = { git = "https://github.com/sweengineeringlabs/edge.git", branch = "dev" }
 
 [dev-dependencies]
-tokio   = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-futures = "0.3"
-bytes   = "1.0"
+tokio    = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+futures  = "0.3"
+bytes    = "1.0"
+tempfile = "3.0"
+toml     = "0.8"
 
 [[test]]
 name = "broker_int_test"
@@ -84,6 +87,14 @@ path = "tests/nats_message_broker_int_test.rs"
 [[test]]
 name = "broker_backend_int_test"
 path = "tests/broker_backend_int_test.rs"
+
+[[test]]
+name = "message_broker_config_int_test"
+path = "tests/message_broker_config_int_test.rs"
+
+[[test]]
+name = "backend_kind_int_test"
+path = "tests/backend_kind_int_test.rs"
 
 [[example]]
 name = "in_memory_broker"
