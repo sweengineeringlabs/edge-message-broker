@@ -5,6 +5,8 @@
 //! strictness, cross-field validation, and the `BrokerSvc::from_config`
 //! factory wiring.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, OptionalSection};
 use swe_edge_message_broker::{BackendKind, BrokerSvc, MessageBrokerConfig};
 use tempfile::TempDir;

@@ -1,5 +1,7 @@
 //! Tests for the [`Validator`] trait contract and [`BrokerSvc::validate`].
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use swe_edge_message_broker::{BrokerSvc, Validator};
 
 #[test]

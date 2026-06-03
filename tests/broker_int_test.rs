@@ -1,10 +1,12 @@
 //! Integration tests for [`swe_edge_message_broker`].
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 #[cfg(feature = "tokio-rt")]
 mod in_memory_tests {
     use bytes::Bytes;
     use futures::StreamExt;
-    use swe_edge_message_broker::{BrokerSvc, Message, MessageBroker};
+    use swe_edge_message_broker::{BrokerSvc, Message};
 
     /// @covers: in_memory_broker
     #[tokio::test]
@@ -63,18 +65,12 @@ mod in_memory_tests {
         assert_eq!(msg.payload, Bytes::from_static(b"order"));
     }
 
-    #[tokio::test]
-    async fn test_clone_handle_shares_channels() {
-        let broker = BrokerSvc::in_memory_broker();
-        let handle = broker.clone();
-        let mut stream = broker.subscribe("clone-test").await.unwrap();
-        handle
-            .publish("clone-test", Message::new(b"shared".as_ref()))
-            .await
-            .unwrap();
-        let msg = stream.next().await.unwrap().unwrap();
-        assert_eq!(msg.payload, Bytes::from_static(b"shared"));
-    }
+    // NOTE: a `test_clone_handle_shares_channels` test was removed here. The SAF
+    // factory `in_memory_broker()` returns `Box<dyn MessageBroker>` (SEA rule-195
+    // — saf returns trait objects, not concrete cloneable handles), which is not
+    // `Clone`, so cloning a public handle is intentionally not part of the API.
+    // Shared delivery across handles/subscribers is covered by
+    // `test_fan_out_delivers_to_all_subscribers` below.
 
     #[tokio::test]
     async fn test_health_check_returns_ok() {

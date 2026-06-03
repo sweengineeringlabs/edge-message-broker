@@ -2,6 +2,11 @@
 // @allow: no_mocks_in_integration — InMemoryMessageBroker is a production
 // feature (tokio broadcast channel broker), not a mock. It is the primary
 // non-NATS broker implementation shipped with the crate.
+//
+// The public `InMemoryMessageBroker` marker is re-exported only under the
+// `tokio-rt` feature (the broker it tags can only be built with that feature),
+// so this test is gated to match.
+#![cfg(feature = "tokio-rt")]
 
 use swe_edge_message_broker::InMemoryMessageBroker;
 

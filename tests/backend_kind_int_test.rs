@@ -4,6 +4,8 @@
 //! These tests pin its snake_case wire spellings and prove unknown/miscased
 //! values are rejected rather than silently defaulted.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use swe_edge_message_broker::BackendKind;
 
 #[derive(serde::Deserialize)]

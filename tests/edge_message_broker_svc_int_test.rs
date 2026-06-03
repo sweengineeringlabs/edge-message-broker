@@ -1,6 +1,12 @@
 //! Public-API integration tests for the message broker SAF surface.
 
-use swe_edge_message_broker::{BrokerSvc, MessageBroker};
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
+// `BrokerSvc` is exercised by both the tokio-rt and nats tests; trait methods on
+// the returned `Box<dyn MessageBroker>` resolve through the trait object, so the
+// `MessageBroker` trait itself need not be imported.
+#[cfg(any(feature = "tokio-rt", feature = "nats"))]
+use swe_edge_message_broker::BrokerSvc;
 
 /// @covers: in_memory_broker
 #[cfg(feature = "tokio-rt")]
@@ -33,8 +39,10 @@ async fn test_in_memory_broker_pub_sub_roundtrip() {
 async fn test_nats_broker_returns_connection_error_for_unreachable_host() {
     use swe_edge_message_broker::BrokerError;
     let result = BrokerSvc::nats_broker("nats://127.0.0.1:4229").await;
+    // Note: don't `{result:?}` — the Ok variant is `Box<dyn MessageBroker>`,
+    // which is not `Debug`. A static message keeps the assertion compilable.
     assert!(
         matches!(result, Err(BrokerError::Connection(_))),
-        "expected Connection error, got: {result:?}"
+        "expected a Connection error from an unreachable NATS host"
     );
 }

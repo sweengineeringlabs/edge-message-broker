@@ -3,11 +3,13 @@
 //! Demonstrates how to use [`swe_edge_message_broker`] with the `tokio-rt`
 //! feature to pub/sub messages in the same process.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 #[cfg(feature = "tokio-rt")]
 #[tokio::main]
 async fn main() {
     use futures::StreamExt as _;
-    use swe_edge_message_broker::{BrokerSvc, Message, MessageBroker as _};
+    use swe_edge_message_broker::{BrokerSvc, Message};
 
     let broker = BrokerSvc::in_memory_broker();
 
