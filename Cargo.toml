@@ -1,109 +1,19 @@
-[package]
-name         = "swe-edge-message-broker"
+[workspace]
+resolver = "2"
+members  = ["main/message-broker"]
+
+[workspace.package]
 version      = "0.1.0"
 edition      = "2021"
 license      = "MIT OR Apache-2.0"
 rust-version = "1.95"
 authors      = ["SWE Engineering Labs"]
-repository   = "https://github.com/sweengineeringlabs/edge"
-description  = "edge — message broker: runtime-agnostic MessageBroker trait with in-memory, NATS, and Kafka backends."
-keywords     = ["message-broker", "pubsub", "nats", "async", "swe"]
-categories   = ["network-programming", "asynchronous"]
+repository   = "https://github.com/sweengineeringlabs/edge-message-broker"
 
-[package.metadata.struct-engine]
-application_type = "lib"
-service_type     = "message-broker"
-
-[lib]
-name = "swe_edge_message_broker"
-path = "src/lib.rs"
-
-[features]
-# In-memory tokio broadcast broker. Disable if you only want the trait.
-default  = []
-tokio-rt = ["dep:tokio"]
-# NATS broker via async-nats (pure Rust, no C dependency).
-nats     = ["dep:async-nats"]
-# Kafka broker via rdkafka (requires librdkafka C library — deferred).
-kafka    = []
-
-[dependencies]
-bytes                  = "1.0"
-futures                = "0.3"
-serde                  = { version = "1.0", features = ["derive"] }
-thiserror              = "1.0"
-tracing                = "0.1"
-tokio                  = { version = "1.0", features = ["sync", "rt"], optional = true }
-async-nats             = { version = "0.49", optional = true }
-swe-edge-configbuilder = { git = "https://github.com/sweengineeringlabs/edge.git", branch = "dev" }
-
-[dev-dependencies]
-tokio    = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-futures  = "0.3"
-bytes    = "1.0"
-tempfile = "3.0"
-toml     = "0.8"
-
-[[test]]
-name = "broker_int_test"
-path = "tests/broker_int_test.rs"
-
-[[test]]
-name = "application_config_builder_int_test"
-path = "tests/application_config_builder_int_test.rs"
-
-[[test]]
-name = "edge_message_broker_svc_int_test"
-path = "tests/edge_message_broker_svc_int_test.rs"
-
-[[test]]
-name = "validator_int_test"
-path = "tests/validator_int_test.rs"
-
-[[test]]
-name = "broker_error_int_test"
-path = "tests/broker_error_int_test.rs"
-
-[[test]]
-name = "message_int_test"
-path = "tests/message_int_test.rs"
-
-[[test]]
-name = "message_broker_int_test"
-path = "tests/message_broker_int_test.rs"
-
-[[test]]
-name = "message_stream_int_test"
-path = "tests/message_stream_int_test.rs"
-
-[[test]]
-name = "in_memory_message_broker_int_test"
-path = "tests/in_memory_message_broker_int_test.rs"
-
-[[test]]
-name = "nats_message_broker_int_test"
-path = "tests/nats_message_broker_int_test.rs"
-
-[[test]]
-name = "broker_backend_int_test"
-path = "tests/broker_backend_int_test.rs"
-
-[[test]]
-name = "message_broker_config_int_test"
-path = "tests/message_broker_config_int_test.rs"
-
-[[test]]
-name = "backend_kind_int_test"
-path = "tests/backend_kind_int_test.rs"
-
-[[example]]
-name = "in_memory_broker"
-path = "examples/in_memory_broker.rs"
-
-[lints.rust]
+[workspace.lints.rust]
 unsafe_code  = "deny"
 missing_docs = "warn"
 
-[lints.clippy]
+[workspace.lints.clippy]
 unwrap_used = "deny"
 expect_used = "deny"
