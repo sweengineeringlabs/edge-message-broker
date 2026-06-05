@@ -1,9 +1,8 @@
-#[cfg(feature = "tokio-rt")]
-pub(crate) mod r#in;
-#[cfg(feature = "nats")]
-pub(crate) mod nats;
+//! Broker implementations.
+//!
+//! Only the no-op reference broker lives here; real backends (in-memory tokio
+//! broadcast, NATS) are owned by `swe-edge-runtime`.
 
-#[cfg(feature = "tokio-rt")]
-pub(crate) use self::r#in::in_memory_message_broker::InMemoryMessageBroker;
-#[cfg(feature = "nats")]
-pub(crate) use nats::nats_message_broker::NatsMessageBroker;
+pub(crate) mod noop_message_broker;
+
+pub(crate) use noop_message_broker::NoopMessageBroker;

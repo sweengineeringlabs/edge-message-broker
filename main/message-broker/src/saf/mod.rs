@@ -2,10 +2,6 @@
 
 mod broker_svc;
 
-#[cfg(feature = "nats")]
-pub use crate::api::broker::nats::NatsMessageBroker;
-#[cfg(feature = "tokio-rt")]
-pub use crate::api::broker::r#in::InMemoryMessageBroker;
 pub use crate::api::broker::Message;
 pub use crate::api::broker::MessageBroker;
 pub use crate::api::broker::MessageStream;

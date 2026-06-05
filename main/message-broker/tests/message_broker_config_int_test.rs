@@ -2,13 +2,15 @@
 //!
 //! Exercises `MessageBrokerConfig` as an `OptionalSection`: presence-based
 //! enabling, the `enabled = false` disable toggle, `deny_unknown_fields`
-//! strictness, cross-field validation, and the `BrokerSvc::from_config`
-//! factory wiring.
+//! strictness, and cross-field validation.
+//!
+//! The `from_config` construction factory lives in `swe-edge-runtime` and is
+//! tested there; this contract crate only owns the config vocabulary.
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, OptionalSection};
-use swe_edge_message_broker::{BackendKind, BrokerSvc, MessageBrokerConfig};
+use swe_edge_message_broker::{BackendKind, MessageBrokerConfig};
 use tempfile::TempDir;
 
 /// Write `content` to `application.toml` in a fresh temp dir and return a loader
@@ -165,53 +167,3 @@ fn test_unknown_backend_value_is_rejected() {
     assert!(matches!(err, ConfigError::Parse(_)), "got {err:?}");
 }
 
-// ── factory wiring (feature-dependent) ────────────────────────────────────────
-
-/// @covers: from_config — with the `tokio-rt` feature, an in_memory config
-/// produces a real, usable broker (round-trips a published message).
-#[cfg(feature = "tokio-rt")]
-#[tokio::test]
-async fn test_from_config_in_memory_builds_usable_broker() {
-    use futures::StreamExt as _;
-    use swe_edge_message_broker::Message;
-
-    let cfg = MessageBrokerConfig {
-        backend: BackendKind::InMemory,
-        url: None,
-    };
-    let broker = BrokerSvc::from_config(&cfg)
-        .await
-        .expect("in_memory broker builds with tokio-rt");
-
-    // Prove it is a real wired broker: subscribe, publish, receive.
-    let mut sub = broker.subscribe("topic").await.expect("subscribe");
-    broker
-        .publish("topic", Message::new("hello"))
-        .await
-        .expect("publish");
-    let received = sub
-        .next()
-        .await
-        .expect("a message is delivered")
-        .expect("delivery is not an error");
-    assert_eq!(&received.payload[..], b"hello");
-}
-
-/// @covers: from_config — without the `tokio-rt` feature, requesting the
-/// in_memory backend reports the missing feature instead of silently failing.
-#[cfg(not(feature = "tokio-rt"))]
-#[tokio::test]
-async fn test_from_config_in_memory_without_feature_returns_unavailable() {
-    use swe_edge_message_broker::BrokerError;
-
-    let cfg = MessageBrokerConfig {
-        backend: BackendKind::InMemory,
-        url: None,
-    };
-    // `Box<dyn MessageBroker>` is not `Debug`, so match instead of `expect_err`.
-    let result = BrokerSvc::from_config(&cfg).await;
-    assert!(
-        matches!(result, Err(BrokerError::Unavailable(_))),
-        "expected Unavailable error when the tokio-rt feature is absent"
-    );
-}
