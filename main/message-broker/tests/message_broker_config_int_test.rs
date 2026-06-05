@@ -158,10 +158,48 @@ fn test_in_memory_with_url_returns_validation_error() {
     assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
 }
 
+/// @covers: validate_enabled — kafka requires both url and group_id.
+#[test]
+fn test_kafka_without_url_returns_validation_error() {
+    let (_dir, loader) =
+        loader_with("[message_broker]\nbackend = \"kafka\"\ngroup_id = \"workers\"");
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("kafka without url must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(err.to_string().contains("url"), "error must mention `url`: {err}");
+}
+
+/// @covers: validate_enabled — kafka without group_id is rejected.
+#[test]
+fn test_kafka_without_group_id_returns_validation_error() {
+    let (_dir, loader) =
+        loader_with("[message_broker]\nbackend = \"kafka\"\nurl = \"broker:9092\"");
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("kafka without group_id must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(
+        err.to_string().contains("group_id"),
+        "error must mention `group_id`: {err}"
+    );
+}
+
+/// @covers: load_optional — kafka with url + group_id enables and parses.
+#[test]
+fn test_kafka_with_url_and_group_id_returns_enabled() {
+    let (_dir, loader) = loader_with(
+        "[message_broker]\nbackend = \"kafka\"\nurl = \"broker:9092\"\ngroup_id = \"workers\"",
+    );
+    let state = MessageBrokerConfig::load_optional(&loader).expect("valid kafka section loads");
+    let cfg = state.into_option().expect("section present => Enabled");
+    assert_eq!(cfg.backend, BackendKind::Kafka);
+    assert_eq!(cfg.url.as_deref(), Some("broker:9092"));
+    assert_eq!(cfg.group_id.as_deref(), Some("workers"));
+}
+
 /// @covers: backend deserialization — an unknown backend value is rejected.
 #[test]
 fn test_unknown_backend_value_is_rejected() {
-    let (_dir, loader) = loader_with("[message_broker]\nbackend = \"kafka\"");
+    let (_dir, loader) = loader_with("[message_broker]\nbackend = \"rabbitmq\"");
     let err = MessageBrokerConfig::load_optional(&loader)
         .expect_err("unknown backend variant must fail to parse");
     assert!(matches!(err, ConfigError::Parse(_)), "got {err:?}");

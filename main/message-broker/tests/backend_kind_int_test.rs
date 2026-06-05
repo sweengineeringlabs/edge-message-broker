@@ -31,11 +31,18 @@ fn test_backend_kind_nats_deserializes() {
     assert_eq!(h.backend, BackendKind::Nats);
 }
 
+/// @covers: BackendKind — `"kafka"` deserializes to the kafka variant.
+#[test]
+fn test_backend_kind_kafka_deserializes() {
+    let h = parse("backend = \"kafka\"").expect("kafka parses");
+    assert_eq!(h.backend, BackendKind::Kafka);
+}
+
 /// @covers: BackendKind — an unknown spelling is rejected, not silently defaulted.
 #[test]
 fn test_backend_kind_unknown_value_is_rejected() {
     assert!(
-        parse("backend = \"kafka\"").is_err(),
+        parse("backend = \"rabbitmq\"").is_err(),
         "unknown backend value must not parse"
     );
 }

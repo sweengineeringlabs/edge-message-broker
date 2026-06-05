@@ -21,12 +21,21 @@ use crate::api::types::backend_kind::BackendKind;
 /// reject `enabled` as an unknown field. (`enabled = false` is safe — the
 /// loader interprets it and short-circuits before deserialization.)
 ///
-/// # Example
+/// # Examples
 ///
+/// NATS:
 /// ```toml
 /// [message_broker]
 /// backend = "nats"
 /// url     = "nats://nats.internal:4222"
+/// ```
+///
+/// Kafka:
+/// ```toml
+/// [message_broker]
+/// backend  = "kafka"
+/// url      = "kafka-broker-1:9092,kafka-broker-2:9092"
+/// group_id = "my-service"
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -34,10 +43,17 @@ pub struct MessageBrokerConfig {
     /// Which backend to construct.
     pub backend: BackendKind,
 
-    /// Server URL for network backends. Required when `backend = "nats"`;
-    /// must be absent when `backend = "in_memory"`.
+    /// Server URL for network backends.
+    ///
+    /// - `nats`: NATS server URL (e.g. `"nats://host:4222"`). Required.
+    /// - `kafka`: Comma-separated bootstrap brokers (e.g. `"broker1:9092,broker2:9092"`). Required.
+    /// - `in_memory`: Must be absent.
     #[serde(default)]
     pub url: Option<String>,
+
+    /// Consumer group identifier. Required when `backend = "kafka"`; must be absent otherwise.
+    #[serde(default)]
+    pub group_id: Option<String>,
 }
 
 impl OptionalSection for MessageBrokerConfig {
@@ -57,13 +73,42 @@ impl OptionalSection for MessageBrokerConfig {
                          (e.g. url = \"nats://host:4222\")",
                     ));
                 }
+                if self.group_id.is_some() {
+                    return Err(ConfigError::validation(
+                        Self::section_name(),
+                        "backend = \"nats\" does not accept a `group_id`; remove it",
+                    ));
+                }
             }
             BackendKind::InMemory => {
                 if self.url.is_some() {
                     return Err(ConfigError::validation(
                         Self::section_name(),
                         "backend = \"in_memory\" does not accept a `url`; \
-                         remove it or set backend = \"nats\"",
+                         remove it or set backend = \"nats\" or backend = \"kafka\"",
+                    ));
+                }
+                if self.group_id.is_some() {
+                    return Err(ConfigError::validation(
+                        Self::section_name(),
+                        "backend = \"in_memory\" does not accept a `group_id`; remove it",
+                    ));
+                }
+            }
+            BackendKind::Kafka => {
+                let url_set = self.url.as_deref().is_some_and(|u| !u.trim().is_empty());
+                if !url_set {
+                    return Err(ConfigError::validation(
+                        Self::section_name(),
+                        "backend = \"kafka\" requires a non-empty `url` \
+                         (bootstrap brokers, e.g. url = \"broker1:9092,broker2:9092\")",
+                    ));
+                }
+                let group_set = self.group_id.as_deref().is_some_and(|g| !g.trim().is_empty());
+                if !group_set {
+                    return Err(ConfigError::validation(
+                        Self::section_name(),
+                        "backend = \"kafka\" requires a non-empty `group_id`",
                     ));
                 }
             }
