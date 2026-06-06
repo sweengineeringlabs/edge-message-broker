@@ -2,7 +2,7 @@
 
 use swe_edge_configbuilder::{ConfigError, FeatureMetadata, OptionalSection};
 
-use crate::api::types::backend_kind::BackendKind;
+use crate::api::vo::backend_kind::BackendKind;
 
 /// Canonical configuration for the `[message_broker]` TOML section.
 ///
@@ -104,7 +104,10 @@ impl OptionalSection for MessageBrokerConfig {
                          (bootstrap brokers, e.g. url = \"broker1:9092,broker2:9092\")",
                     ));
                 }
-                let group_set = self.group_id.as_deref().is_some_and(|g| !g.trim().is_empty());
+                let group_set = self
+                    .group_id
+                    .as_deref()
+                    .is_some_and(|g| !g.trim().is_empty());
                 if !group_set {
                     return Err(ConfigError::validation(
                         Self::section_name(),

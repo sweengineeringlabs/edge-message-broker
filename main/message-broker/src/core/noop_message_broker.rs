@@ -1,16 +1,16 @@
 //! `NoopMessageBroker` — the contract crate's reference no-op broker.
 //!
 //! Publishing discards the message; subscribing yields an immediately-empty
-//! stream. Real backends (in-memory tokio broadcast, NATS) live in
-//! `swe-edge-runtime` — this crate ships only the contract plus this no-op so
-//! the [`MessageBroker`] trait has an in-tree implementation for contract tests.
+//! stream. Real backends live in `swe-edge-runtime` — this crate ships only the
+//! contract plus this no-op so the [`MessageBroker`] trait has an in-tree
+//! implementation for contract tests.
 
 use futures::future::BoxFuture;
 
-use crate::api::broker::broker_error::BrokerError;
-use crate::api::broker::message::message::Message;
-use crate::api::broker::message_broker::MessageBroker;
-use crate::api::broker::stream::MessageStream;
+use crate::api::error::broker_error::BrokerError;
+use crate::api::traits::message_broker::MessageBroker;
+use crate::api::types::message_stream::MessageStream;
+use crate::api::vo::message::Message;
 
 /// No-op [`MessageBroker`]: `publish` succeeds without delivery, `subscribe`
 /// returns an empty stream, `health_check` always reports healthy.

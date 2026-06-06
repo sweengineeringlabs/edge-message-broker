@@ -9,7 +9,7 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BackendKind {
-    /// In-process `tokio::sync::broadcast` broker. Requires the `tokio-rt` feature.
+    /// In-process broadcast broker. Constructed by `swe-edge-runtime`.
     InMemory,
     /// NATS server connection. Requires the `nats` feature and a `url`.
     Nats,

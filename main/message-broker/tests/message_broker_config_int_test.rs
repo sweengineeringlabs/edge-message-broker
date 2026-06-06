@@ -166,7 +166,10 @@ fn test_kafka_without_url_returns_validation_error() {
     let err = MessageBrokerConfig::load_optional(&loader)
         .expect_err("kafka without url must fail validation");
     assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
-    assert!(err.to_string().contains("url"), "error must mention `url`: {err}");
+    assert!(
+        err.to_string().contains("url"),
+        "error must mention `url`: {err}"
+    );
 }
 
 /// @covers: validate_enabled — kafka without group_id is rejected.
@@ -204,4 +207,3 @@ fn test_unknown_backend_value_is_rejected() {
         .expect_err("unknown backend variant must fail to parse");
     assert!(matches!(err, ConfigError::Parse(_)), "got {err:?}");
 }
-

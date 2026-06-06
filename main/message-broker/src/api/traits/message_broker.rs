@@ -2,16 +2,16 @@
 
 use futures::future::BoxFuture;
 
-use crate::api::broker::broker_error::BrokerError;
-use crate::api::broker::message::message::Message;
-use crate::api::broker::stream::MessageStream;
+use crate::api::error::broker_error::BrokerError;
+use crate::api::types::message_stream::MessageStream;
+use crate::api::vo::message::Message;
 
 /// Cross-process publish/subscribe broker contract.
 ///
-/// Implement this trait to plug in any broker backend — in-memory tokio
-/// broadcast, NATS, Kafka, or a custom transport.  The crate ships
-/// [`crate::InMemoryMessageBroker`] (`tokio-rt` feature) and
-/// [`crate::NatsMessageBroker`] (`nats` feature) as ready-made implementations.
+/// Implement this trait to plug in any broker backend — an in-process broker,
+/// a network message bus, or a custom transport. This crate ships the no-op
+/// reference broker via [`crate::BrokerSvc::noop_broker`]; production backends
+/// are constructed by `swe-edge-runtime`.
 ///
 /// # Publish semantics
 ///

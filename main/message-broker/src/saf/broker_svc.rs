@@ -7,9 +7,9 @@
 //! no-op reference broker. Real backends (in-memory tokio broadcast, NATS) and
 //! the `from_config` construction factory live in `swe-edge-runtime`.
 
-use crate::api::broker::message_broker::MessageBroker;
+use crate::api::traits::message_broker::MessageBroker;
 use crate::api::types::broker_svc::BrokerSvc;
-use crate::core::broker::NoopMessageBroker;
+use crate::core::NoopMessageBroker;
 
 impl BrokerSvc {
     /// Return a [`ConfigBuilderImpl`] pre-seeded with this crate's package name and version.
