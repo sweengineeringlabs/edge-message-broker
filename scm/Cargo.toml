@@ -1,11 +1,11 @@
 [package]
 name         = "swe-edge-message-broker"
-version.workspace     = true
-edition.workspace     = true
-license.workspace     = true
-rust-version.workspace = true
-authors.workspace     = true
-repository.workspace  = true
+version      = "0.1.0"
+edition      = "2021"
+license      = "MIT OR Apache-2.0"
+rust-version = "1.95"
+authors      = ["SWE Engineering Labs"]
+repository   = "https://github.com/sweengineeringlabs/edge-message-broker"
 description  = "edge — message broker CONTRACT: runtime-agnostic MessageBroker trait, message/stream/error value types, and config vocabulary. Backends live in swe-edge-runtime."
 keywords     = ["message-broker", "pubsub", "contract", "async", "swe"]
 categories   = ["network-programming", "asynchronous"]
@@ -16,7 +16,7 @@ service_type     = "message-broker"
 
 [lib]
 name = "swe_edge_message_broker"
-path = "src/lib.rs"
+path = "main/src/lib.rs"
 
 [dependencies]
 bytes                  = "1.0"
@@ -77,5 +77,10 @@ path = "tests/message_broker_config_int_test.rs"
 name = "backend_kind_int_test"
 path = "tests/backend_kind_int_test.rs"
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code  = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
