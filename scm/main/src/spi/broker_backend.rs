@@ -2,8 +2,8 @@
 
 use crate::api::error::broker_error::BrokerError;
 use crate::api::traits::message_broker::MessageBroker;
+use crate::api::types::message::Message;
 use crate::api::types::message_stream::MessageStream;
-use crate::api::vo::message::Message;
 use futures::future::BoxFuture;
 
 /// Extension point marker for downstream broker substitution.

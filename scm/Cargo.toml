@@ -33,50 +33,6 @@ bytes    = "1.0"
 tempfile = "3.0"
 toml     = "0.8"
 
-[[test]]
-name = "noop_message_broker_int_test"
-path = "tests/noop_message_broker_int_test.rs"
-
-[[test]]
-name = "application_config_builder_int_test"
-path = "tests/application_config_builder_int_test.rs"
-
-[[test]]
-name = "edge_message_broker_svc_int_test"
-path = "tests/edge_message_broker_svc_int_test.rs"
-
-[[test]]
-name = "validator_int_test"
-path = "tests/validator_int_test.rs"
-
-[[test]]
-name = "broker_error_int_test"
-path = "tests/broker_error_int_test.rs"
-
-[[test]]
-name = "message_int_test"
-path = "tests/message_int_test.rs"
-
-[[test]]
-name = "message_broker_int_test"
-path = "tests/message_broker_int_test.rs"
-
-[[test]]
-name = "message_stream_int_test"
-path = "tests/message_stream_int_test.rs"
-
-[[test]]
-name = "broker_backend_int_test"
-path = "tests/broker_backend_int_test.rs"
-
-[[test]]
-name = "message_broker_config_int_test"
-path = "tests/message_broker_config_int_test.rs"
-
-[[test]]
-name = "backend_kind_int_test"
-path = "tests/backend_kind_int_test.rs"
-
 [lints.rust]
 unsafe_code  = "deny"
 missing_docs = "warn"

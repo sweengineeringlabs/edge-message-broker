@@ -9,8 +9,8 @@ use futures::future::BoxFuture;
 
 use crate::api::error::broker_error::BrokerError;
 use crate::api::traits::message_broker::MessageBroker;
+use crate::api::types::message::Message;
 use crate::api::types::message_stream::MessageStream;
-use crate::api::vo::message::Message;
 
 /// No-op [`MessageBroker`]: `publish` succeeds without delivery, `subscribe`
 /// returns an empty stream, `health_check` always reports healthy.

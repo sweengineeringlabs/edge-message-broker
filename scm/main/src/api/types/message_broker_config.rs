@@ -2,7 +2,7 @@
 
 use swe_edge_configbuilder::{ConfigError, FeatureMetadata, OptionalSection};
 
-use crate::api::vo::backend_kind::BackendKind;
+use crate::api::types::backend_kind::BackendKind;
 
 /// Canonical configuration for the `[message_broker]` TOML section.
 ///
