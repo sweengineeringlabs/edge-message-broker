@@ -1,10 +1,12 @@
 # swe-edge-message-broker
 
+> **TLDR:** Runtime-agnostic pub/sub broker for swe-edge — in-memory, NATS, and Kafka backends behind one `MessageBroker` trait; config-driven backend selection. See [Overview](docs/README.md) for details.
+
 Runtime-agnostic cross-process pub/sub broker for `swe-edge` services. Ships an
 in-memory tokio broadcast backend (`tokio-rt`), a NATS backend (`nats`), and
 a Kafka backend (`kafka`). Bring your own backend by implementing `MessageBroker`.
 
-## Configuration
+## Quick Start
 
 This crate owns its `[message_broker]` TOML contract (ADR-006): the backend
 defines the section name, field shape, and validation rules. Consumers opt in
@@ -49,3 +51,9 @@ if let FeatureState::Enabled(cfg) = state {
     // ... wire `broker` into the runtime
 }
 ```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Overview](docs/README.md) | WHAT + WHY — capabilities and design rationale |
