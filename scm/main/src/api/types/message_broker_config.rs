@@ -67,52 +67,57 @@ impl OptionalSection for MessageBrokerConfig {
             BackendKind::Nats => {
                 let url_set = self.url.as_deref().is_some_and(|u| !u.trim().is_empty());
                 if !url_set {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"nats\" requires a non-empty `url` \
-                         (e.g. url = \"nats://host:4222\")",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"nats\" requires a non-empty `url` \
+                         (e.g. url = \"nats://host:4222\")"
+                            .to_string(),
+                    });
                 }
                 if self.group_id.is_some() {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"nats\" does not accept a `group_id`; remove it",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"nats\" does not accept a `group_id`; remove it"
+                            .to_string(),
+                    });
                 }
             }
             BackendKind::InMemory => {
                 if self.url.is_some() {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"in_memory\" does not accept a `url`; \
-                         remove it or set backend = \"nats\" or backend = \"kafka\"",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"in_memory\" does not accept a `url`; \
+                         remove it or set backend = \"nats\" or backend = \"kafka\""
+                            .to_string(),
+                    });
                 }
                 if self.group_id.is_some() {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"in_memory\" does not accept a `group_id`; remove it",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"in_memory\" does not accept a `group_id`; remove it"
+                            .to_string(),
+                    });
                 }
             }
             BackendKind::Kafka => {
                 let url_set = self.url.as_deref().is_some_and(|u| !u.trim().is_empty());
                 if !url_set {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"kafka\" requires a non-empty `url` \
-                         (bootstrap brokers, e.g. url = \"broker1:9092,broker2:9092\")",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"kafka\" requires a non-empty `url` \
+                         (bootstrap brokers, e.g. url = \"broker1:9092,broker2:9092\")"
+                            .to_string(),
+                    });
                 }
                 let group_set = self
                     .group_id
                     .as_deref()
                     .is_some_and(|g| !g.trim().is_empty());
                 if !group_set {
-                    return Err(ConfigError::validation(
-                        Self::section_name(),
-                        "backend = \"kafka\" requires a non-empty `group_id`",
-                    ));
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"kafka\" requires a non-empty `group_id`".to_string(),
+                    });
                 }
             }
         }

@@ -14,6 +14,10 @@ categories   = ["network-programming", "asynchronous"]
 application_type = "lib"
 service_type     = "message-broker"
 
+[package.metadata.arch]
+application_type = "lib"
+service_type     = "message-broker"
+
 [lib]
 name = "swe_edge_message_broker"
 path = "main/src/lib.rs"
@@ -24,7 +28,7 @@ futures                = "0.3"
 serde                  = { version = "1.0", features = ["derive"] }
 thiserror              = "2.0"
 tracing                = "0.1"
-swe-edge-configbuilder = { git = "https://github.com/sweengineeringlabs/edge-configbuilder.git", tag = "v0.3.0" }
+swe-edge-configbuilder = { git = "https://github.com/sweengineeringlabs/edge-configbuilder.git", tag = "v0.4.2" }
 
 [dev-dependencies]
 tokio    = { version = "1.52", features = ["rt-multi-thread", "macros"] }
