@@ -12,7 +12,7 @@ use crate::api::types::broker_svc::BrokerSvc;
 use crate::core::NoopMessageBroker;
 
 impl BrokerSvc {
-    /// Return a [`ConfigBuilderImpl`] pre-seeded with this crate's package name and version.
+    /// Return a [`ConfigBuilderImpl`](swe_edge_configbuilder::ConfigBuilderImpl) pre-seeded with this crate's package name and version.
     pub fn create_config_builder() -> swe_edge_configbuilder::ConfigBuilderImpl {
         swe_edge_configbuilder::ConfigLoaderFactory::create_config_builder()
             .with_name(env!("CARGO_PKG_NAME"))
@@ -28,7 +28,7 @@ impl BrokerSvc {
         Box::new(NoopMessageBroker)
     }
 
-    /// Validate a value that implements [`Validator`].
+    /// Validate a value that implements [`Validator`](crate::Validator).
     pub fn validate<V: crate::api::traits::Validator>(v: &V) -> Result<(), String> {
         v.validate()
     }
