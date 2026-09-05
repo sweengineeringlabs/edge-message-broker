@@ -38,6 +38,13 @@ fn test_backend_kind_kafka_deserializes() {
     assert_eq!(h.backend, BackendKind::Kafka);
 }
 
+/// @covers: BackendKind — `"postgres"` deserializes to the postgres variant.
+#[test]
+fn test_backend_kind_postgres_deserializes() {
+    let h = parse("backend = \"postgres\"").expect("postgres parses");
+    assert_eq!(h.backend, BackendKind::Postgres);
+}
+
 /// @covers: BackendKind — an unknown spelling is rejected, not silently defaulted.
 #[test]
 fn test_backend_kind_unknown_value_is_rejected() {
