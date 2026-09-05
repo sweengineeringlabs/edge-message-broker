@@ -1,6 +1,6 @@
 # RFC-001 — Postgres/pgmq Message Broker Backend
 
-**Status:** Proposed
+**Status:** Implemented (contract + backend code; no live `pgmq` round-trip test yet — see Follow-ups)
 **Date:** 2026-09-05
 **Scope:** `swe-edge-message-broker` (this crate) — new `BackendKind::Postgres` variant; downstream implementation in `swe-edge-runtime-message-broker` (`runtime/message-broker`, edge-runtime repo)
 **GitHub Issue:** sweengineeringlabs/edge-message-broker#5
@@ -124,14 +124,15 @@ queue_name = "edge_events"
 
 ## Follow-ups
 
-- [ ] Add `BackendKind::Postgres` to `api/types/backend_kind.rs` (this crate), `snake_case` deserialization (`"postgres"`)
-- [ ] Add `url` + `queue_name` fields to `MessageBrokerConfig` for the `Postgres` variant
-- [ ] Add `postgres` feature flag + `sqlx` optional dependency in `swe-edge-runtime-message-broker`
-- [ ] Implement `PostgresMessageBroker` in `spi/broker/postgres/pgmq_message_broker.rs`
-- [ ] Add `MessageBrokerFactory::postgres(dsn, queue_name)` in `saf/`
-- [ ] Integration test `postgres_message_broker_int_test.rs` against a live Postgres with `pgmq` installed
-- [ ] Document the `CREATE EXTENSION pgmq;` prerequisite and queue-vs-broadcast semantics difference
-- [ ] Add a `postgres` backend example to `config/application.toml`
+- [x] Add `BackendKind::Postgres` to `api/types/backend_kind.rs` (this crate), `snake_case` deserialization (`"postgres"`) — `d7ad7f0`, released `v0.3.6`
+- [x] Add `url` + `queue_name` fields to `MessageBrokerConfig` for the `Postgres` variant — `d7ad7f0`, released `v0.3.6`
+- [x] Add `postgres` feature flag + `sqlx` optional dependency in `swe-edge-runtime-message-broker`
+- [x] Implement `PostgresMessageBroker` in `spi/broker/postgres/postgres_message_broker.rs`
+- [x] Add `MessageBrokerFactory::postgres(dsn, queue_name)` in `saf/`
+- [x] `postgres_message_broker_int_test.rs` — covers DSN parsing and every error path (missing `url`, missing `queue_name`, unreachable host, feature-disabled) without requiring live infra
+- [ ] **Not done**: an actual `pgmq` round-trip test (`send`/`pop` against a real queue) — no live Postgres+`pgmq` instance is available in this environment. Needs a CI Postgres service container with `pgmq` installed (see Open Questions #1) before this can be verified.
+- [x] Document the `CREATE EXTENSION pgmq;` prerequisite and queue-vs-broadcast semantics difference — doc comments on `PostgresMessageBroker` and `MessageBrokerFactory::postgres`
+- [x] Add a `postgres` backend example to `config/application.toml` (also fixed pre-existing drift in that file — it referenced nonexistent `nats_url`/`kafka_brokers` fields and `"inmemory"` instead of `"in_memory"`)
 
 See sweengineeringlabs/edge-message-broker#5 for the tracked task list and acceptance criteria.
 
