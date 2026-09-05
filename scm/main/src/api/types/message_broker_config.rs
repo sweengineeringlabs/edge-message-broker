@@ -37,6 +37,14 @@ use crate::api::types::backend_kind::BackendKind;
 /// url      = "kafka-broker-1:9092,kafka-broker-2:9092"
 /// group_id = "my-service"
 /// ```
+///
+/// Postgres (pgmq):
+/// ```toml
+/// [message_broker]
+/// backend    = "postgres"
+/// url        = "postgres://user:pass@localhost/app"
+/// queue_name = "edge_events"
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MessageBrokerConfig {
@@ -47,6 +55,7 @@ pub struct MessageBrokerConfig {
     ///
     /// - `nats`: NATS server URL (e.g. `"nats://host:4222"`). Required.
     /// - `kafka`: Comma-separated bootstrap brokers (e.g. `"broker1:9092,broker2:9092"`). Required.
+    /// - `postgres`: Postgres DSN (e.g. `"postgres://user:pass@host/db"`). Required.
     /// - `in_memory`: Must be absent.
     #[serde(default)]
     pub url: Option<String>,
@@ -54,6 +63,10 @@ pub struct MessageBrokerConfig {
     /// Consumer group identifier. Required when `backend = "kafka"`; must be absent otherwise.
     #[serde(default)]
     pub group_id: Option<String>,
+
+    /// `pgmq` queue name. Required when `backend = "postgres"`; must be absent otherwise.
+    #[serde(default)]
+    pub queue_name: Option<String>,
 }
 
 impl OptionalSection for MessageBrokerConfig {
@@ -81,13 +94,20 @@ impl OptionalSection for MessageBrokerConfig {
                             .to_string(),
                     });
                 }
+                if self.queue_name.is_some() {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"nats\" does not accept a `queue_name`; remove it"
+                            .to_string(),
+                    });
+                }
             }
             BackendKind::InMemory => {
                 if self.url.is_some() {
                     return Err(ConfigError::Validation {
                         section: Self::section_name().to_string(),
                         reason: "backend = \"in_memory\" does not accept a `url`; \
-                         remove it or set backend = \"nats\" or backend = \"kafka\""
+                         remove it or set backend = \"nats\", \"kafka\", or \"postgres\""
                             .to_string(),
                     });
                 }
@@ -95,6 +115,13 @@ impl OptionalSection for MessageBrokerConfig {
                     return Err(ConfigError::Validation {
                         section: Self::section_name().to_string(),
                         reason: "backend = \"in_memory\" does not accept a `group_id`; remove it"
+                            .to_string(),
+                    });
+                }
+                if self.queue_name.is_some() {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"in_memory\" does not accept a `queue_name`; remove it"
                             .to_string(),
                     });
                 }
@@ -117,6 +144,42 @@ impl OptionalSection for MessageBrokerConfig {
                     return Err(ConfigError::Validation {
                         section: Self::section_name().to_string(),
                         reason: "backend = \"kafka\" requires a non-empty `group_id`".to_string(),
+                    });
+                }
+                if self.queue_name.is_some() {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"kafka\" does not accept a `queue_name`; remove it"
+                            .to_string(),
+                    });
+                }
+            }
+            BackendKind::Postgres => {
+                let url_set = self.url.as_deref().is_some_and(|u| !u.trim().is_empty());
+                if !url_set {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"postgres\" requires a non-empty `url` \
+                         (Postgres DSN, e.g. url = \"postgres://user:pass@host/db\")"
+                            .to_string(),
+                    });
+                }
+                let queue_set = self
+                    .queue_name
+                    .as_deref()
+                    .is_some_and(|q| !q.trim().is_empty());
+                if !queue_set {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"postgres\" requires a non-empty `queue_name`"
+                            .to_string(),
+                    });
+                }
+                if self.group_id.is_some() {
+                    return Err(ConfigError::Validation {
+                        section: Self::section_name().to_string(),
+                        reason: "backend = \"postgres\" does not accept a `group_id`; remove it"
+                            .to_string(),
                     });
                 }
             }

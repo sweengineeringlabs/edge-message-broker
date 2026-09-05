@@ -207,3 +207,77 @@ fn test_unknown_backend_value_is_rejected() {
         .expect_err("unknown backend variant must fail to parse");
     assert!(matches!(err, ConfigError::Parse(_)), "got {err:?}");
 }
+
+/// @covers: validate_enabled — postgres requires both url and queue_name.
+#[test]
+fn test_postgres_without_url_returns_validation_error() {
+    let (_dir, loader) =
+        loader_with("[message_broker]\nbackend = \"postgres\"\nqueue_name = \"edge_events\"");
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("postgres without url must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(
+        err.to_string().contains("url"),
+        "error must mention `url`: {err}"
+    );
+}
+
+/// @covers: validate_enabled — postgres without queue_name is rejected.
+#[test]
+fn test_postgres_without_queue_name_returns_validation_error() {
+    let (_dir, loader) =
+        loader_with("[message_broker]\nbackend = \"postgres\"\nurl = \"postgres://localhost/app\"");
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("postgres without queue_name must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(
+        err.to_string().contains("queue_name"),
+        "error must mention `queue_name`: {err}"
+    );
+}
+
+/// @covers: validate_enabled — postgres does not accept a group_id.
+#[test]
+fn test_postgres_with_group_id_returns_validation_error() {
+    let (_dir, loader) = loader_with(
+        "[message_broker]\nbackend = \"postgres\"\nurl = \"postgres://localhost/app\"\n\
+         queue_name = \"edge_events\"\ngroup_id = \"workers\"",
+    );
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("postgres with group_id must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(
+        err.to_string().contains("group_id"),
+        "error must mention `group_id`: {err}"
+    );
+}
+
+/// @covers: load_optional — postgres with url + queue_name enables and parses.
+#[test]
+fn test_postgres_with_url_and_queue_name_returns_enabled() {
+    let (_dir, loader) = loader_with(
+        "[message_broker]\nbackend = \"postgres\"\nurl = \"postgres://localhost/app\"\n\
+         queue_name = \"edge_events\"",
+    );
+    let state = MessageBrokerConfig::load_optional(&loader).expect("valid postgres section loads");
+    let cfg = state.into_option().expect("section present => Enabled");
+    assert_eq!(cfg.backend, BackendKind::Postgres);
+    assert_eq!(cfg.url.as_deref(), Some("postgres://localhost/app"));
+    assert_eq!(cfg.queue_name.as_deref(), Some("edge_events"));
+}
+
+/// @covers: validate_enabled — non-postgres backends reject a queue_name.
+#[test]
+fn test_kafka_with_queue_name_returns_validation_error() {
+    let (_dir, loader) = loader_with(
+        "[message_broker]\nbackend = \"kafka\"\nurl = \"broker:9092\"\n\
+         group_id = \"workers\"\nqueue_name = \"edge_events\"",
+    );
+    let err = MessageBrokerConfig::load_optional(&loader)
+        .expect_err("kafka with queue_name must fail validation");
+    assert!(matches!(err, ConfigError::Validation { .. }), "got {err:?}");
+    assert!(
+        err.to_string().contains("queue_name"),
+        "error must mention `queue_name`: {err}"
+    );
+}
