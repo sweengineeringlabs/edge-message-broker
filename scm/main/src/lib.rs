@@ -14,8 +14,12 @@
 
 mod api;
 mod core;
-mod gateway;
 mod saf;
 mod spi;
 
-pub use gateway::*;
+pub use api::{
+    BackendKind, BrokerError, BrokerFuture, BrokerSvc, HealthCheckRequest, Message,
+    MessageBrokerConfig, MessageStream, PublishRequest, SubscribeRequest, SubscribeResponse,
+    ValidationError, ValidationRequest, ValidatorRequest, ValidatorResponse,
+};
+pub use saf::{MessageBroker, Validator};

@@ -1,10 +1,9 @@
 //! [`MessageBroker`] — runtime-agnostic cross-process pub/sub contract.
 
-use futures::future::BoxFuture;
-
-use crate::api::error::broker_error::BrokerError;
-use crate::api::types::message::Message;
-use crate::api::types::message_stream::MessageStream;
+use crate::api::{
+    BrokerError, BrokerFuture, HealthCheckRequest, PublishRequest, SubscribeRequest,
+    SubscribeResponse, ValidatorRequest, ValidatorResponse,
+};
 
 /// Cross-process publish/subscribe broker contract.
 ///
@@ -28,17 +27,24 @@ use crate::api::types::message_stream::MessageStream;
 ///
 /// [`subscribe`]: MessageBroker::subscribe
 pub trait MessageBroker: Send + Sync {
-    /// Publish `msg` to `topic`, delivering it to all active subscribers.
-    fn publish<'a>(
-        &'a self,
-        topic: &'a str,
-        msg: Message,
-    ) -> BoxFuture<'a, Result<(), BrokerError>>;
+    /// Publish `request.message` to `request.topic`, delivering it to all
+    /// active subscribers.
+    fn publish<'a>(&'a self, request: PublishRequest) -> BrokerFuture<'a, Result<(), BrokerError>>;
 
-    /// Subscribe to `topic`, returning a stream of incoming messages.
-    fn subscribe<'a>(&'a self, topic: &'a str)
-        -> BoxFuture<'a, Result<MessageStream, BrokerError>>;
+    /// Subscribe to `request.topic`, returning a stream of incoming messages.
+    fn subscribe<'a>(
+        &'a self,
+        request: SubscribeRequest,
+    ) -> BrokerFuture<'a, Result<SubscribeResponse, BrokerError>>;
 
     /// Probe broker connectivity. Returns `Ok(())` if the broker is reachable.
-    fn health_check(&self) -> BoxFuture<'_, Result<(), BrokerError>>;
+    fn health_check(
+        &self,
+        request: HealthCheckRequest,
+    ) -> BrokerFuture<'_, Result<(), BrokerError>>;
+
+    /// Return a handle to this broker's own config validator, so a caller can
+    /// revalidate a live broker's configuration (e.g. for health dashboards or
+    /// hot-reload checks) without naming the concrete config type.
+    fn validator(&self, request: ValidatorRequest) -> Result<ValidatorResponse, BrokerError>;
 }

@@ -9,13 +9,13 @@
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, OptionalSection};
+use configbuilder::{ConfigError, ConfigLoaderFactory, FeatureStateOps, OptionalSection};
 use swe_edge_message_broker::{BackendKind, MessageBrokerConfig};
 use tempfile::TempDir;
 
 /// Write `content` to `application.toml` in a fresh temp dir and return a loader
 /// rooted at that dir, along with the dir guard (kept alive by the caller).
-fn loader_with(content: &str) -> (TempDir, swe_edge_configbuilder::SectionLoaderImpl) {
+fn loader_with(content: &str) -> (TempDir, configbuilder::SectionLoaderImpl) {
     let dir = TempDir::new().expect("create temp dir");
     std::fs::write(dir.path().join("application.toml"), content).expect("write application.toml");
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());

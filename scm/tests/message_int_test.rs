@@ -6,7 +6,7 @@ use swe_edge_message_broker::Message;
 #[test]
 fn test_new_creates_message_with_empty_headers() {
     let m = Message::new(b"hello".as_ref());
-    assert_eq!(m.payload.as_ref(), b"hello");
+    assert_eq!(m.payload.as_slice(), b"hello");
     assert!(m.headers.is_empty());
 }
 
@@ -26,9 +26,8 @@ fn test_with_headers_stores_provided_headers() {
 /// @covers: Message::new — clone produces independent copy
 #[test]
 fn test_message_clone_produces_independent_copy() {
-    use bytes::Bytes;
     let m = Message::new(b"data".as_ref());
     let m2 = m.clone();
     assert_eq!(m.payload, m2.payload);
-    assert_eq!(m2.payload, Bytes::from_static(b"data"));
+    assert_eq!(m2.payload, b"data".to_vec());
 }

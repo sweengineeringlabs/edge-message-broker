@@ -1,10 +1,12 @@
 //! Extension point marker for downstream broker substitution.
 
-use crate::api::error::broker_error::BrokerError;
-use crate::api::traits::message_broker::MessageBroker;
-use crate::api::types::message::Message;
-use crate::api::types::message_stream::MessageStream;
-use futures::future::BoxFuture;
+use std::sync::Arc;
+
+use crate::api::{
+    BrokerError, BrokerFuture, HealthCheckRequest, MessageBroker, MessageStream, PublishRequest,
+    SubscribeRequest, SubscribeResponse, ValidatorRequest, ValidatorResponse,
+};
+use crate::core::noop_validator::NoopValidator;
 
 /// Extension point marker for downstream broker substitution.
 ///
@@ -21,23 +23,31 @@ const _: () = {
 impl MessageBroker for BrokerBackend {
     fn publish<'a>(
         &'a self,
-        _topic: &'a str,
-        _msg: Message,
-    ) -> BoxFuture<'a, Result<(), BrokerError>> {
-        Box::pin(async { Ok(()) })
+        _request: PublishRequest,
+    ) -> BrokerFuture<'a, Result<(), BrokerError>> {
+        BrokerFuture::new(async { Ok(()) })
     }
 
     fn subscribe<'a>(
         &'a self,
-        _topic: &'a str,
-    ) -> BoxFuture<'a, Result<MessageStream, BrokerError>> {
-        Box::pin(async {
+        _request: SubscribeRequest,
+    ) -> BrokerFuture<'a, Result<SubscribeResponse, BrokerError>> {
+        BrokerFuture::new(async {
             let stream: MessageStream = Box::pin(futures::stream::empty());
-            Ok(stream)
+            Ok(SubscribeResponse { stream })
         })
     }
 
-    fn health_check(&self) -> BoxFuture<'_, Result<(), BrokerError>> {
-        Box::pin(async { Ok(()) })
+    fn health_check(
+        &self,
+        _request: HealthCheckRequest,
+    ) -> BrokerFuture<'_, Result<(), BrokerError>> {
+        BrokerFuture::new(async { Ok(()) })
+    }
+
+    fn validator(&self, _request: ValidatorRequest) -> Result<ValidatorResponse, BrokerError> {
+        Ok(ValidatorResponse {
+            validator: Arc::new(NoopValidator),
+        })
     }
 }

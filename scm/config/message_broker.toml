@@ -1,0 +1,7 @@
+# Message broker configuration defaults (MessageBrokerConfig, ADR-006).
+# Consumers override these values in their own application.toml.
+
+[message_broker]
+backend = "in_memory"
+# url      = "nats://localhost:4222"
+# group_id = "my-service"

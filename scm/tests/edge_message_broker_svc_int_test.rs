@@ -6,28 +6,39 @@
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_message_broker::BrokerSvc;
+use swe_edge_message_broker::{BrokerSvc, HealthCheckRequest};
 
 /// @covers: noop_broker
 #[tokio::test]
 async fn test_noop_broker_health_check_returns_ok() {
-    assert!(BrokerSvc::noop_broker().health_check().await.is_ok());
+    assert!(BrokerSvc::noop_broker()
+        .health_check(HealthCheckRequest)
+        .await
+        .is_ok());
 }
 
 /// @covers: noop_broker
 #[tokio::test]
 async fn test_noop_broker_publish_then_subscribe_is_inert() {
     use futures::StreamExt as _;
-    use swe_edge_message_broker::Message;
+    use swe_edge_message_broker::{Message, PublishRequest, SubscribeRequest};
 
     let broker = BrokerSvc::noop_broker();
     broker
-        .publish("svc-test", Message::new(b"ping".as_ref()))
+        .publish(PublishRequest {
+            topic: "svc-test".to_string(),
+            message: std::sync::Arc::new(Message::new(b"ping".as_ref())),
+        })
         .await
         .unwrap();
-    let mut stream = broker.subscribe("svc-test").await.unwrap();
+    let mut response = broker
+        .subscribe(SubscribeRequest {
+            topic: "svc-test".to_string(),
+        })
+        .await
+        .unwrap();
     assert!(
-        stream.next().await.is_none(),
+        response.stream.next().await.is_none(),
         "noop broker delivers nothing"
     );
 }

@@ -39,7 +39,7 @@ write `enabled = true` — it is redundant, and because `MessageBrokerConfig` us
 ### Loading at startup
 
 ```rust
-use swe_edge_configbuilder::{FeatureRegistry, FeatureState};
+use configbuilder::{FeatureRegistry, FeatureState};
 use swe_edge_message_broker::{BrokerSvc, MessageBrokerConfig};
 
 let mut registry = FeatureRegistry::new();
