@@ -4,14 +4,19 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use futures::StreamExt;
-use swe_edge_message_broker::{BrokerSvc, Message};
+use swe_edge_message_broker::{
+    BrokerSvc, HealthCheckRequest, Message, PublishRequest, SubscribeRequest, ValidatorRequest,
+};
 
 /// @covers: noop_message_broker — publishing always succeeds (fire-and-forget).
 #[tokio::test]
 async fn test_noop_publish_returns_ok() {
     let broker = BrokerSvc::noop_broker();
     let result = broker
-        .publish("any.topic", Message::new(b"payload".as_ref()))
+        .publish(PublishRequest {
+            topic: "any.topic".to_string(),
+            message: std::sync::Arc::new(Message::new(b"payload".as_ref())),
+        })
         .await;
     assert!(result.is_ok(), "noop publish must succeed");
 }
@@ -20,9 +25,14 @@ async fn test_noop_publish_returns_ok() {
 #[tokio::test]
 async fn test_noop_subscribe_yields_empty_stream() {
     let broker = BrokerSvc::noop_broker();
-    let mut stream = broker.subscribe("any.topic").await.unwrap();
+    let mut response = broker
+        .subscribe(SubscribeRequest {
+            topic: "any.topic".to_string(),
+        })
+        .await
+        .unwrap();
     assert!(
-        stream.next().await.is_none(),
+        response.stream.next().await.is_none(),
         "noop subscribe must yield no messages"
     );
 }
@@ -31,5 +41,15 @@ async fn test_noop_subscribe_yields_empty_stream() {
 #[tokio::test]
 async fn test_noop_health_check_returns_ok() {
     let broker = BrokerSvc::noop_broker();
-    assert!(broker.health_check().await.is_ok());
+    assert!(broker.health_check(HealthCheckRequest).await.is_ok());
+}
+
+/// @covers: noop_message_broker — validator returns a usable handle.
+#[tokio::test]
+async fn test_noop_validator_returns_always_valid_handle() {
+    use swe_edge_message_broker::ValidationRequest;
+
+    let broker = BrokerSvc::noop_broker();
+    let response = broker.validator(ValidatorRequest).unwrap();
+    assert_eq!(response.validator.validate(ValidationRequest), Ok(()));
 }

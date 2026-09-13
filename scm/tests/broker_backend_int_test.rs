@@ -4,18 +4,21 @@
 //! These tests verify that the MessageBroker contract is satisfied by a
 //! custom implementation — which is the primary SPI use case.
 
-use swe_edge_message_broker::{BrokerSvc, MessageBroker, Validator};
+use swe_edge_message_broker::{BrokerSvc, MessageBroker, ValidationRequest, Validator};
 
 /// @covers: BrokerSvc::validate — validates a custom MessageBroker implementation
 #[test]
 fn test_custom_validator_satisfies_broker_svc_validate() {
     struct MyValidator;
     impl Validator for MyValidator {
-        fn validate(&self) -> Result<(), String> {
+        fn validate(
+            &self,
+            _request: ValidationRequest,
+        ) -> Result<(), swe_edge_message_broker::ValidationError> {
             Ok(())
         }
     }
-    assert!(BrokerSvc::validate(&MyValidator).is_ok());
+    assert_eq!(BrokerSvc::validate(&MyValidator), Ok(()));
 }
 
 /// @covers: MessageBroker — trait is object safe, enabling custom impls
